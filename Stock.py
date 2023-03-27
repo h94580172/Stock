@@ -1,12 +1,10 @@
 import pandas as pd
-import numpy as np
 import requests
 from bs4 import BeautifulSoup
 import re
 import time
 import random
 import os
-from typing import List, Tuple
 import datetime
 
 def check_file_exist(file_path: str) -> bool:
