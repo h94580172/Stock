@@ -1,15 +1,8 @@
-from FinMind.data import DataLoader
-from stock_list import stock_list
+from Stock_Login import df
+from Stock_List import stock_list
 
-api = DataLoader()
-api.login_by_token(api_token='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyMy0wMy0yOCAyMjo0ODozNyIsInVzZXJfaWQiOiJoOTQ1ODAxNzIiLCJpcCI6IjE4MC4xNzcuMC4yMDEifQ.OEggToxfSdTQAT5Qmve6gR_NfTyH_-L8LssFKTIXO9Q')
-api.login(user_id='h94580172',password='h94228200')
-
-# 讀取數據
-df = api.taiwan_stock_daily(start_date='2023-03-28')
-
-# 選取指定日期和股票列表的數據
-selected_df = df[(df['date'] == '2023-03-28') & (df['stock_id'].isin(stock_list))]
+# 選取股票列表的數據
+selected_df = df[df['stock_id'].isin(stock_list)]
 
 # 計算漲幅
 selected_df['percent_change'] = (selected_df['spread'] / selected_df['open']) * 100
