@@ -1,6 +1,5 @@
 from Stock_Login import df
 from Stock_List import stock_list
-
 # 選取股票列表的數據
 selected_df = df[df['stock_id'].isin(stock_list)]
 
