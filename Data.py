@@ -1,23 +1,24 @@
 import requests
 import pandas as pd
-from datetime import datetime, timedelta
-from List import holiday_dates
-
-# # 獲取今天的日期
-today = datetime.today()
-yesterday = today - timedelta(days=1)
-
-# 計算起始日期
-start_date = today - timedelta(days=2)
-
-today = today.strftime('%Y-%m-%d')
-start_date = start_date.strftime('%Y-%m-%d')
+from datetime import datetime
+from List import holiday_dates, stock_list
 
 # 定義假日列表
-holidays = pd.to_datetime(holiday_dates).tolist()
+holidays = pd.to_datetime(holiday_dates)
 
-# 獲取最近30天的工作日
-workdays = pd.bdate_range(start=start_date, end=yesterday, freq="C", holidays=holidays)
+# 設定 CustomBusinessDay 的規則，遇到假日就不扣除
+custom_bday = pd.offsets.CustomBusinessDay(holidays=holidays)
+
+# 獲取今天的日期
+today = datetime.today()
+
+# 設定要扣除的天數
+days_to_subtract = 10
+
+# 計算最近的工作日
+start_date = pd.Timestamp(today) - custom_bday * days_to_subtract
+last_workday = pd.Timestamp(today) - custom_bday
+workdays = pd.date_range(start=start_date, end=last_workday, freq=custom_bday)
 
 # 將日期轉換成指定的格式
 workdays_str = [d.strftime('%Y-%m-%d') for d in workdays]
@@ -29,20 +30,12 @@ def get_stock_data(date):
     parameter = {
         "dataset": "TaiwanStockPriceAdj",
         "start_date": date,
-        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyMy0wMy0yOCAyMjo0ODozNyIsInVzZXJfaWQiOiJoOTQ1ODAxNzIiLCJpcCI6IjE4MC4xNzcuMC4yMDEifQ.OEggToxfSdTQAT5Qmve6gR_NfTyH_-L8LssFKTIXO9Q", # 參考登入，獲取金鑰
+        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyMy0wMy0yOCAyMjo0ODozNyIsInVzZXJfaWQiOiJoOTQ1ODAxNzIiLCJpcCI6IjE4MC4xNzcuMC4yMDEifQ.OEggToxfSdTQAT5Qmve6gR_NfTyH_-L8LssFKTIXO9Q",
     }
     resp = requests.get(url, params=parameter)
     data = resp.json()
     data = pd.DataFrame(data["data"])
     return data
-
-from List import stock_list
-
-
-# # 計算5日移動平均數
-# stock['5ma'] = stock.groupby('stock_id')['close'].rolling(window=5).mean().reset_index(drop=True)
-
-
 
 if __name__ == '__main__':
     with pd.ExcelWriter('stock_data.xlsx') as writer:
